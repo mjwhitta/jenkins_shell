@@ -1,0 +1,136 @@
+#!/usr/bin/env ruby
+
+require "djinni"
+require "hilighter"
+require "io/wait"
+require "jenkins_shell"
+require "optparse"
+
+class JShExit
+    GOOD = 0
+    INVALID_OPTION = 1
+    INVALID_ARGUMENT = 2
+    MISSING_ARGUMENT = 3
+    EXTRA_ARGUMENTS = 4
+    EXCEPTION = 5
+    AMBIGUOUS_ARGUMENT = 6
+end
+
+def parse(args)
+    options = Hash.new
+    options["port"] = "8080"
+    options["verbose"] = false
+
+    info = "Simulate a cmd prompt using Jenkins script functionality"
+
+    parser = OptionParser.new do |opts|
+        opts.summary_width = 16
+
+        opts.banner = "Usage: #{File.basename($0)} [OPTIONS] <host>"
+
+        opts.on("")
+
+        info.scan(/\S.{0,80}\S(?=\s|$)|\S+/).each do |line|
+            opts.on("#{line}")
+        end
+
+        opts.on("", "OPTIONS")
+
+        opts.on("-h", "--help", "Display this help message") do
+            puts opts
+            exit JShExit::GOOD
+        end
+
+        opts.on("--nocolor", "Disable colorized output") do
+            Hilighter.disable
+        end
+
+        opts.on(
+            "-p",
+            "--port=PORT",
+            "Use specified port (default: #{options["port"]})"
+        ) do |port|
+            options["port"] = port
+        end
+
+        opts.on(
+            "-v",
+            "--verbose",
+            "Show backtrace when error occurs"
+        ) do
+            options["verbose"] = true
+        end
+    end
+
+    begin
+        parser.parse!(args)
+    rescue OptionParser::InvalidOption => e
+        puts e.message
+        puts parser
+        exit JShExit::INVALID_OPTION
+    rescue OptionParser::InvalidArgument => e
+        puts e.message
+        puts parser
+        exit JShExit::INVALID_ARGUMENT
+    rescue OptionParser::MissingArgument => e
+        puts e.message
+        puts parser
+        exit JShExit::MISSING_ARGUMENT
+    rescue OptionParser::AmbiguousOption => e
+        puts e.message
+        puts parser
+        exit JShExit::AMBIGUOUS_ARGUMENT
+    end
+
+    if (args.empty?)
+        puts parser
+        exit JShExit::MISSING_ARGUMENT
+    elsif (args.length == 1)
+        options["host"] = args[0]
+    else
+        puts parser
+        exit JShExit::EXTRA_ARGUMENTS
+    end
+
+    return options
+end
+
+options = parse(ARGV)
+
+begin
+    jsh = JenkinsShell.new(options["host"], options["port"])
+
+    djinni = Djinni.new
+    djinni.fallback = "cmd"
+    djinni.load_wishes(
+        "#{File.dirname(__FILE__)}/../lib/jenkins_shell/wish"
+    )
+    djinni.prompt({"jsh" => jsh}, "#{jsh.pwd}> ".light_white)
+rescue SystemExit
+    # Quite from djinni
+    # Exit gracefully
+rescue Interrupt
+    # ^C
+    # Exit gracefully
+rescue Errno::EPIPE
+    # Do nothing. This can happen if piping to another program such as
+    # less. Usually if less is closed before we're done with STDOUT.
+rescue Exception => e
+    $stderr.puts "Oops! Looks like an error has occured! If the " \
+        "error persists, file a bug at:".wrap
+    $stderr.puts
+    $stderr.puts "    https://gitlab.com/mjwhitta/todo/issues"
+    $stderr.puts
+    $stderr.puts "Maybe the message below will help. If not, you " \
+        "can use the --verbose flag to get a backtrace.".wrap
+    $stderr.puts
+
+    $stderr.puts e.message.white.on_red
+    if (options["verbose"])
+        e.backtrace.each do |line|
+            $stderr.puts line.light_yellow
+        end
+    end
+    exit JShExit::EXCEPTION
+end
+exit JShExit::GOOD
