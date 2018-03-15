@@ -26,14 +26,24 @@ class JenkinsShell
         gs = "println(\"cmd /c cd #{fix} && #{cmd}\".execute().text)"
         enc = URI::encode(URI::encode(gs), "&()/").gsub("%20", "+")
 
-        # Establish connection and send script
-        http = Net::HTTP.new(@host, @port)
-        xml = REXML::Document.new(
-            http.post("/script", "script=#{enc}").body
-        )
+        begin
+            # Establish connection and send script
+            http = Net::HTTP.new(@host, @port)
+            xml = REXML::Document.new(
+                http.post("/script", "script=#{enc}").body
+            )
 
-        # Parse response and return script output
-        return xml.get_elements("html/body/div/div/pre")[1].text
+            # Parse response and return script output
+            return xml.get_elements("html/body/div/div/pre")[1].text
+        rescue Errno::ECONNREFUSED
+            raise JenkinsShell::Error::ConnectionRefused.new(
+                @host,
+                @port
+            )
+        rescue REXML::ParseException
+            raise JenkinsShell::Error::InvalidHTMLReceived.new
+        end
+        return ""
     end
 
     def initialize(host, port = 8080)
@@ -50,3 +60,5 @@ class JenkinsShell
         return ""
     end
 end
+
+require "jenkins_shell/error"
