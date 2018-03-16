@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
     s.name = "jenkins_shell"
-    s.version = "0.0.4"
+    s.version = "0.0.5"
     s.date = Time.new.strftime("%Y-%m-%d")
     s.summary = "Simulate a cmd prompt using Jenkins."
     s.description = [

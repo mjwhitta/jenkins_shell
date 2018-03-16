@@ -34,7 +34,7 @@ def parse(args)
     info = "Simulate a cmd prompt using Jenkins script functionality"
 
     parser = OptionParser.new do |opts|
-        opts.summary_width = 16
+        opts.summary_width = 26
 
         opts.banner = "Usage: #{File.basename($0)} [OPTIONS] <host>"
 

@@ -13,7 +13,7 @@ class PwdWish < Djinni::Wish
         usage if (!args.empty?)
 
         jsh = djinni_env["jsh"]
-        puts jsh.cwd if (args.empty?)
+        puts jsh.pwd if (args.empty?)
         djinni_env["djinni_prompt"] = "#{jsh.cwd}> ".light_white
     end
 
