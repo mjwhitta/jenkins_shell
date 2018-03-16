@@ -16,9 +16,18 @@ class JShExit
     AMBIGUOUS_ARGUMENT = 6
 end
 
+def get_password
+    print "Enter password: "
+    passwd = STDIN.noecho(&:gets)
+    puts
+    return passwd.chomp
+end
+
 def parse(args)
     options = Hash.new
+    options["password"] = nil
     options["port"] = "8080"
+    options["username"] = nil
     options["verbose"] = false
 
     info = "Simulate a cmd prompt using Jenkins script functionality"
@@ -46,11 +55,22 @@ def parse(args)
         end
 
         opts.on(
+            "--password=PASSWORD",
+            "Use specified password (will prompt if not provided)"
+        ) do |password|
+            options["password"] = password
+        end
+
+        opts.on(
             "-p",
             "--port=PORT",
             "Use specified port (default: #{options["port"]})"
         ) do |port|
             options["port"] = port
+        end
+
+        opts.on("-u", "--user=USER", "Use specified username") do |u|
+            options["username"] = u
         end
 
         opts.on(
@@ -98,7 +118,14 @@ end
 options = parse(ARGV)
 
 begin
-    jsh = JenkinsShell.new(options["host"], options["port"])
+    passwd = options["password"]
+    passwd = get_password if (options["username"] && passwd.nil?)
+    jsh = JenkinsShell.new(
+        options["host"],
+        options["port"],
+        options["username"],
+        passwd
+    )
 
     djinni = Djinni.new
     djinni.fallback = "cmd"
