@@ -33,5 +33,4 @@ $ jsh -p <port> <host>
 
 ## TODO
 
-- Support TLS/SSL
 - RDoc

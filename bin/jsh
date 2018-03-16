@@ -27,6 +27,7 @@ def parse(args)
     options = Hash.new
     options["password"] = nil
     options["port"] = "8080"
+    options["ssl"] = false
     options["username"] = nil
     options["verbose"] = false
 
@@ -67,6 +68,10 @@ def parse(args)
             "Use specified port (default: #{options["port"]})"
         ) do |port|
             options["port"] = port
+        end
+
+        opts.on("-s", "--ssl", "Use TLS/SSL") do
+            options["ssl"] = true
         end
 
         opts.on("-u", "--user=USER", "Use specified username") do |u|
@@ -123,6 +128,7 @@ begin
     jsh = JenkinsShell.new(
         options["host"],
         options["port"],
+        options["ssl"],
         options["username"],
         passwd
     )

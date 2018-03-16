@@ -51,6 +51,7 @@ class JenkinsShell
         begin
             # Establish connection
             http = Net::HTTP.new(@host, @port)
+            http.use_ssl = @ssl
 
             # Create request
             req = Net::HTTP::Get.new(path)
@@ -78,14 +79,23 @@ class JenkinsShell
     end
     private :get
 
-    def initialize(host, port = 8080, username = nil, password = nil)
+    def initialize(
+        host,
+        port = 8080,
+        ssl = false,
+        username = nil,
+        password = nil
+    )
         @cookie = nil
         @crumb = nil
         @int_cwd = "."
         @host = host.gsub(/^https?:\/\/|(:[0-9]+)?\/.+/, "")
         @password = password
         @port = port
+        @ssl = ssl
         @username = username
+
+        # Initialize @cwd
         @cwd = pwd
     end
 
@@ -110,6 +120,7 @@ class JenkinsShell
         begin
             # Establish connection
             http = Net::HTTP.new(@host, @port)
+            http.use_ssl = @ssl
 
             # Create request
             req = Net::HTTP::Post.new(path)
