@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
     s.name = "jenkins_shell"
-    s.version = "0.0.5"
+    s.version = "0.0.6"
     s.date = Time.new.strftime("%Y-%m-%d")
     s.summary = "Simulate a cmd prompt using Jenkins."
     s.description = [
@@ -13,9 +13,9 @@ Gem::Specification.new do |s|
         Dir["*"]
     end
     s.files = Dir["lib/**/*.rb"]
-    s.homepage = "https://mjwhitta.github.io/jenkins_shell"
+    s.homepage = "https://gitlab.com/mjwhitta/jenkins_shell"
     s.license = "GPL-3.0"
-    s.add_development_dependency("rake", "~> 12.3", ">= 12.3.0")
-    s.add_runtime_dependency("djinni", "~> 2.2", ">= 2.2.0")
-    s.add_runtime_dependency("hilighter", "~> 1.2", ">= 1.2.1")
+    s.add_development_dependency("rake", "~> 12.3", ">= 12.3.1")
+    s.add_runtime_dependency("djinni", "~> 2.2", ">= 2.2.1")
+    s.add_runtime_dependency("hilighter", "~> 1.2", ">= 1.2.3")
 end

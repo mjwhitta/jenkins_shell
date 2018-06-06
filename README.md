@@ -28,7 +28,6 @@ $ jsh -p <port> <host>
 ## Links
 
 - [Source](https://gitlab.com/mjwhitta/jenkins_shell)
-- [Mirror](https://github.com/mjwhitta/jenkins_shell)
 - [RubyGems](https://rubygems.org/gems/jenkins_shell)
 
 ## TODO
