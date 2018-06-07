@@ -14,7 +14,13 @@ class PwdWish < Djinni::Wish
 
         jsh = djinni_env["jsh"]
         puts jsh.pwd if (args.empty?)
-        djinni_env["djinni_prompt"] = "#{jsh.cwd}> ".light_white
+
+        case djinni_env["os"]
+        when JenkinsShell::OS.LINUX
+            djinni_env["djinni_prompt"] = "#{jsh.cwd}$ ".light_white
+        when JenkinsShell::OS.WINDOWS
+            djinni_env["djinni_prompt"] = "#{jsh.cwd}> ".light_white
+        end
     end
 
     def usage

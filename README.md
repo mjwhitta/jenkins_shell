@@ -1,6 +1,6 @@
 # Jenkins shell
 
-Simulate a cmd prompt using Jenkins.
+Simulate a Linux shell or Windows cmd prompt using Jenkins.
 
 ## How to install
 
@@ -21,8 +21,7 @@ $ bundle install && rake install
 ## How to use
 
 ```
-$ jsh <host>
-$ jsh -p <port> <host>
+$ jsh http[s]://[user[:pass]@]host[:port][/path]
 ```
 
 ## Links
@@ -32,4 +31,5 @@ $ jsh -p <port> <host>
 
 ## TODO
 
+- Make the `cd` command work with Linux
 - RDoc

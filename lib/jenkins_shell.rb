@@ -31,8 +31,21 @@ class JenkinsShell
         end
 
         # Create Groovy script
-        fix = dir.gsub(/\\/, "\\\\\\")
-        gs = "println(\"cmd /c cd #{fix} && #{cmd}\".execute().text)"
+        gs = [
+            "println(\"",
+            "#{
+                case @os
+                when JenkinsShell::OS.LINUX
+                    # FIXME
+                    # "cd #{dir} && #{cmd}"
+                    cmd
+                when JenkinsShell::OS.WINDOWS
+                    "cmd /c cd #{dir.gsub(/\\/, "\\\\\\")} && #{cmd}"
+                end
+            }",
+            "\".execute().text",
+            ")"
+        ].join
 
         # Make POST request and return command output
         xml = post("/script", "script=#{encode(gs)}")[1]
@@ -54,7 +67,7 @@ class JenkinsShell
             http.use_ssl = @ssl
 
             # Create request
-            req = Net::HTTP::Get.new(path)
+            req = Net::HTTP::Get.new("#{@path}#{path}")
             req["Cookie"] = @cookie if (@cookie)
 
             # Send request and get response
@@ -79,21 +92,40 @@ class JenkinsShell
     end
     private :get
 
-    def initialize(
-        host,
-        port = 8080,
-        ssl = false,
-        username = nil,
-        password = nil
-    )
+    def initialize(params)
         @cookie = nil
         @crumb = nil
         @int_cwd = "."
-        @host = host.gsub(/^https?:\/\/|(:[0-9]+)?\/.+/, "")
-        @password = password
-        @port = port
-        @ssl = ssl
-        @username = username
+
+        creds = "(([^:]+)(:(.+))?@)?"
+        host = "([^:/]+)"
+        path = "(/(.+))?"
+        port = "(:([0-9]+))?"
+        prot = "(https?)://"
+
+        params["host"].match(
+            /^#{prot}#{creds}#{host}#{port}#{path}/
+        ) do |m|
+            @host = m[6]
+            @password = m[5]
+            @path = m[10]
+            @port = m[8]
+            case m[1]
+            when "http"
+                @ssl = false
+            when "https"
+                @ssl = true
+            end
+            @username = m[3]
+        end
+
+        @os = params["os"]
+        @password ||= params["password"]
+        @path ||= params["path"]
+        @path = "/#{@path}" if (@path)
+        @port ||= params["port"] || 8080
+        @ssl ||= params["ssl"] || false
+        @username ||= params["username"]
 
         # Initialize @cwd
         @cwd = pwd
@@ -123,7 +155,7 @@ class JenkinsShell
             http.use_ssl = @ssl
 
             # Create request
-            req = Net::HTTP::Post.new(path)
+            req = Net::HTTP::Post.new("#{@path}#{path}")
             req.body = body.join("&")
             req["Cookie"] = @cookie if (@cookie)
 
@@ -150,8 +182,13 @@ class JenkinsShell
     private :post
 
     def pwd(dir = @int_cwd)
-        command("dir", dir).match(/^\s+Directory of (.+)/) do |m|
-            return m[1]
+        case @os
+        when JenkinsShell::OS.LINUX
+            return command("pwd", dir)
+        when JenkinsShell::OS.WINDOWS
+            command("dir", dir).match(/^\s+Directory of (.+)/) do |m|
+                return m[1]
+            end
         end
         return ""
     end
@@ -171,3 +208,4 @@ class JenkinsShell
 end
 
 require "jenkins_shell/error"
+require "jenkins_shell/os"

@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
     s.name = "jenkins_shell"
-    s.version = "0.0.6"
+    s.version = "0.1.0"
     s.date = Time.new.strftime("%Y-%m-%d")
-    s.summary = "Simulate a cmd prompt using Jenkins."
+    s.summary = "Simulate a Linux/Windows prompt using Jenkins."
     s.description = [
         "This gem will use the scripting functionality of Jenkins to",
-        "simulate a Windows cmd prompt."
+        "simulate a Linux shell or Windows cmd prompt."
     ].join(" ")
     s.authors = ["Miles Whittaker"]
     s.email = "mjwhitta@gmail.com"

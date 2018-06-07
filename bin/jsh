@@ -26,12 +26,17 @@ end
 def parse(args)
     options = Hash.new
     options["password"] = nil
+    options["path"] = ""
     options["port"] = "8080"
+    options["os"] = JenkinsShell::OS.WINDOWS
     options["ssl"] = false
     options["username"] = nil
     options["verbose"] = false
 
-    info = "Simulate a cmd prompt using Jenkins script functionality"
+    info = [
+        "Simulate a Linux/Windows prompt using Jenkins script",
+        "functionality"
+    ].join(" ")
 
     parser = OptionParser.new do |opts|
         opts.summary_width = 26
@@ -51,15 +56,24 @@ def parse(args)
             exit JShExit::GOOD
         end
 
+        opts.on("-l", "--linux", "Remote OS is Linux") do
+            options["os"] = JenkinsShell::OS.LINUX
+        end
+
         opts.on("--nocolor", "Disable colorized output") do
             Hilighter.disable
         end
 
         opts.on(
             "--password=PASSWORD",
-            "Use specified password (will prompt if not provided)"
+            "Use specified password (will prompt",
+            "if not provided)"
         ) do |password|
             options["password"] = password
+        end
+
+        opts.on("--path=PATH", "Path from root of host") do |path|
+            options["path"] = path.gsub(/^\//, "")
         end
 
         opts.on(
@@ -84,6 +98,14 @@ def parse(args)
             "Show backtrace when error occurs"
         ) do
             options["verbose"] = true
+        end
+
+        opts.on(
+            "-w",
+            "--windows",
+            "Remote OS is Windows (default)"
+        ) do
+            options["os"] = JenkinsShell::OS.WINDOWS
         end
     end
 
@@ -125,20 +147,21 @@ options = parse(ARGV)
 begin
     passwd = options["password"]
     passwd = get_password if (options["username"] && passwd.nil?)
-    jsh = JenkinsShell.new(
-        options["host"],
-        options["port"],
-        options["ssl"],
-        options["username"],
-        passwd
-    )
+    options["password"] = passwd
+    jsh = JenkinsShell.new(options)
 
     djinni = Djinni.new
     djinni.fallback = "cmd"
     djinni.load_wishes(
         "#{File.dirname(__FILE__)}/../lib/jenkins_shell/wish"
     )
-    djinni.prompt({"jsh" => jsh}, "#{jsh.pwd}> ".light_white)
+    case options["os"]
+    when JenkinsShell::OS.LINUX
+        prompt = "#{jsh.pwd}$ ".light_white
+    when JenkinsShell::OS.WINDOWS
+        prompt = "#{jsh.pwd}> ".light_white
+    end
+    djinni.prompt({"jsh" => jsh, "os" => options["os"]}, prompt)
 rescue SystemExit
     # Quite from djinni
     # Exit gracefully
