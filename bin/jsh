@@ -142,7 +142,11 @@ def parse(args)
     return options
 end
 
-options = parse(ARGV)
+begin
+    options = parse(ARGV)
+rescue Interrupt
+    # Exit gracefully on ^C
+end
 
 begin
     passwd = options["password"]
@@ -166,8 +170,7 @@ rescue SystemExit
     # Quite from djinni
     # Exit gracefully
 rescue Interrupt
-    # ^C
-    # Exit gracefully
+    # Exit gracefully on ^C
 rescue Errno::EPIPE
     # Do nothing. This can happen if piping to another program such as
     # less. Usually if less is closed before we're done with STDOUT.
@@ -175,13 +178,17 @@ rescue JenkinsShell::Error => e
     puts e.message
     exit JShExit::EXCEPTION
 rescue Exception => e
-    $stderr.puts "Oops! Looks like an error has occured! If the " \
-        "error persists, file a bug at:".wrap
+    $stderr.puts [
+        "Oops! Looks like an error has occured! If the error",
+        "persists, file a bug at:"
+    ].join(" ").wrap
     $stderr.puts
-    $stderr.puts "    https://gitlab.com/mjwhitta/todo/issues"
+    $stderr.puts "  https://gitlab.com/mjwhitta/jenkins_shell/issues"
     $stderr.puts
-    $stderr.puts "Maybe the message below will help. If not, you " \
-        "can use the --verbose flag to get a backtrace.".wrap
+    $stderr.puts [
+        "Maybe the message below will help. If not, you can use the",
+        "--verbose flag to get a backtrace."
+    ].join(" ").wrap
     $stderr.puts
 
     $stderr.puts e.message.white.on_red
