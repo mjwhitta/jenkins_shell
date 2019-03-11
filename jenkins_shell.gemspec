@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
     s.files = Dir["lib/**/*.rb"]
     s.homepage = "https://gitlab.com/mjwhitta/jenkins_shell"
     s.license = "GPL-3.0"
-    s.add_development_dependency("rake", "~> 12.3", ">= 12.3.1")
-    s.add_runtime_dependency("djinni", "~> 2.2", ">= 2.2.1")
+    s.add_development_dependency("rake", "~> 12.3", ">= 12.3.2")
+    s.add_runtime_dependency("djinni", "~> 2.2", ">= 2.2.4")
     s.add_runtime_dependency("hilighter", "~> 1.2", ">= 1.2.3")
 end
