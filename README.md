@@ -1,5 +1,7 @@
 # Jenkins shell
 
+<a href="https://www.buymeacoffee.com/mjwhitta">🍪 Buy me a cookie</a>
+
 Simulate a Linux shell or Windows cmd prompt using Jenkins.
 
 ## How to install
