@@ -183,7 +183,7 @@ rescue Exception => e
         "persists, file a bug at:"
     ].join(" ").wrap
     $stderr.puts
-    $stderr.puts "  https://gitlab.com/mjwhitta/jenkins_shell/issues"
+    $stderr.puts "  https://github.com/mjwhitta/jenkins_shell/issues"
     $stderr.puts
     $stderr.puts [
         "Maybe the message below will help. If not, you can use the",

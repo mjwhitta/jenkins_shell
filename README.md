@@ -15,7 +15,7 @@ $ gem install jenkins_shell
 Or install from source:
 
 ```
-$ git clone https://gitlab.com/mjwhitta/jenkins_shell.git
+$ git clone https://github.com/mjwhitta/jenkins_shell.git
 $ cd jenkins_shell
 $ bundle install && rake install
 ```
@@ -28,7 +28,7 @@ $ jsh http[s]://[user[:pass]@]host[:port][/path]
 
 ## Links
 
-- [Source](https://gitlab.com/mjwhitta/jenkins_shell)
+- [Source](https://github.com/mjwhitta/jenkins_shell)
 - [RubyGems](https://rubygems.org/gems/jenkins_shell)
 
 ## TODO
